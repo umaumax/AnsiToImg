@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Optional
 
 import asyncio
+import os
 from os import remove
 from pathlib import Path
 import svgwrite
@@ -35,7 +36,7 @@ def ansiToSVG(ansiText: str, fileName: str, theme: Optional[str]=None, wide: boo
 	ansiBlocks = AnsiBlocks(ansiText, wide)
 	ansiBlocks.process()
 	blocks = ansiBlocks.ansiBlocks
-	size = ((95 if wide else 55) * TEXT_WIDTH, TEXT_HEIGHT * ansiBlocks.height + 5)
+	size = ((int(os.getenv("COLUMNS", "89" if wide else "49")) + 6) * TEXT_WIDTH, TEXT_HEIGHT * ansiBlocks.height + 5)
 	dwg = svgwrite.Drawing(fileName, size)
 	dwg.add(dwg.rect((0, 0), size, fill="#" + themeData["base00"])) # type: ignore
 	dwg.defs.add(dwg.style("@import url('https://rawcdn.githack.com/tonsky/FiraCode/07666484a9d92ec6ea916b94f776fc2410a87a11/distr/fira_code.css');"))
@@ -79,7 +80,7 @@ def ansiToRaster(ansiText: str, fileName: str, theme: Optional[str]=None, wide: 
 	ansiBlocks = AnsiBlocks(ansiText, wide)
 	ansiBlocks.process()
 	blocks = ansiBlocks.ansiBlocks
-	size = (int((95 if wide else 55) * TEXT_WIDTH), int(TEXT_HEIGHT * ansiBlocks.height + 5))
+	size = (int((int(os.getenv("COLUMNS", "89" if wide else "49")) + 6) * TEXT_WIDTH), int(TEXT_HEIGHT * ansiBlocks.height + 5))
 	image = Image.new("RGB", size, "#" + themeData["base00"])
 	draw = ImageDraw.Draw(image)
 	# Load the fonts
@@ -138,7 +139,7 @@ def ansiToSVGRaster(ansiText: str, fileName: str, theme: Optional[str]=None, wid
 	ansiToSVG(ansiText, THISDIR + "/temp.svg", theme, wide)
 	ansiBlocks = AnsiBlocks(ansiText, wide)
 	ansiBlocks.process()
-	size = (int((95 if wide else 55) * TEXT_WIDTH), int(TEXT_HEIGHT * ansiBlocks.height + 5))
+	size = (int((int(os.getenv("COLUMNS", "89" if wide else "49")) + 6) * TEXT_WIDTH), int(TEXT_HEIGHT * ansiBlocks.height + 5))
 	asyncio.get_event_loop().run_until_complete(
 	_doGrabWebpage('file:///' + THISDIR + "/temp.svg", size, fileName))
 	try:
@@ -180,7 +181,7 @@ def ansiToHTML(ansiText: str, fileName: str, theme: Optional[str]=None, wide: bo
 	"/").split("/")[-1] + "</title><meta charset=\"utf-8\"/><meta name=\"viewport\" " +
 	"content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"><link " +
 	"href=\"https://rawcdn.githack.com/tonsky/FiraCode/07666484a9d92ec6ea916b94f776fc2410a87a11/distr/fira_code.css\" "
-	+ "rel=\"stylesheet\"></head><body style=\"min-width: " + str(int((95 if wide else 55) * TEXT_WIDTH)) + "px\">"]
+	+ "rel=\"stylesheet\"></head><body style=\"min-width: " + str(int((int(os.getenv("COLUMNS", "89" if wide else "49")) + 6) * TEXT_WIDTH)) + "px\">"]
 	for block in blocks:
 		style = "color: " + ("#" + themeData["base05"]
 		if block.fgColour is None else block.fgColour) + "; "
@@ -218,7 +219,7 @@ def ansiToHTMLRaster(ansiText: str, fileName: str, theme: Optional[str]=None, wi
 	ansiToHTML(ansiText, THISDIR + "/temp.html", theme, wide)
 	ansiBlocks = AnsiBlocks(ansiText, wide)
 	ansiBlocks.process()
-	size = (int((95 if wide else 55) * 8.63) + 16, int(16.8 * ansiBlocks.height + 16))
+	size = (int((int(os.getenv("COLUMNS", "89" if wide else "49")) + 6) * 8.63) + 16, int(16.8 * ansiBlocks.height + 16))
 	asyncio.get_event_loop().run_until_complete(
 	_doGrabWebpage('file:///' + THISDIR + "/temp.html", size, fileName))
 	try:

@@ -6,6 +6,7 @@ from typing import Optional
 
 from ansitoimg.utils import ansiColourToRGB, findLen
 
+import os
 
 class AnsiBlock():
 	""" represent a block of ANSI text. eg \033[31mhello!\033[0m
@@ -90,7 +91,7 @@ class AnsiBlocks():
 		self.height = 1
 		self.pointer = 0
 
-		self.maxWidth = 89 if wide else 49
+		self.maxWidth = int(os.getenv("COLUMNS", "89" if wide else "49"))
 
 	def process(self):
 		""" process the ANSI text into a series of ANSI blocks """
